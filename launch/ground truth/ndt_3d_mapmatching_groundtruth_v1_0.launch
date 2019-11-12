@@ -1,0 +1,69 @@
+<!-- -->
+<launch>
+
+        <node name="ndt_3d_mapmatching_groundtruth_v1_0" pkg="ndt_3d_mapmatching" type="ndt_3d_mapmatching_groundtruth_v1_0"  output="screen" >
+
+            <!-- rcast map 2 -s 42-->
+            <param name="x_startpoint" value="0.0" />
+            <param name="y_startpoint" value="0.0" />
+            <param name="z_startpoint" value="0.0" />
+            <param name="roll_startpoint" value="0.0" />
+            <param name="pitch_startpoint" value="0.0" />
+            <param name="yaw_startpoint" value="0.0" />
+
+            <param name="vel_x" value= "0.0" />
+            <param name="vel_y" value= "0.0" />
+            <param name="vel_z" value= "0.0" />
+            <param name="vel_roll" value="0.0" />
+            <param name="vel_pitch" value="0.0" />
+            <param name="vel_yaw" value="0.0" />
+
+            <param name="ndt_grid_size" value="1.0" />
+            <param name="ndt_search_res" value="1.0" />
+            <param name="voxel_leaf_size" value="1.0" />
+
+            <param name="save_transformed_scan" value="false" />
+            <param name="save_scan" value="false" />
+            <param name="save_aligned_scan" value="false" />
+            <param name="save_transformed_dis_scan" value="false" />
+            <param name="save_predicted_scan" value="false" />
+
+            <param name="show_map" value="true" />
+            <param name="show_initial_scan" value="true" />
+            <param name="show_trtanformed_scan" value="true" />
+            <param name="show_filtered_scan" value="false"/>
+            <param name="show_scan" value="true" />
+
+            <param name="map_load_mode" value="1" />
+            <param name="map_file_path" value="/home/ehsan/temp/input_data/rcast_map/" />
+            <param name="map_file_name" value="" />
+            <param name="save_path" value="/home/ehsan/temp/results/ndt_mapmatching/" />
+            <param name="in_vel_topic" value="/ns1/ns1/velodyne_points001553" />
+            <param name="lidar_range" value="40.0" />
+
+            <param name="groundtruth_as_prediction" value="true" />
+            <param name="ground_truth_filename" value="/home/ehsan/temp/input_data/map_matching_log_1.0grid_as_groundtruth_rcast.csv" />
+
+
+
+
+
+
+
+
+            <!-- GET INITIAL GUESS FROM MATRIX -->
+
+            <!-- initial guess for scan 13 (Velodyne scan 2017.06.25.15.51.10-Frame 8649) and map merged S16_L1_L2_S19L1 -->
+            <!--
+                    0.062144704163 -0.996374905109 0.058095954359 -6674.901855468750
+                    0.995548725128 0.057750284672 -0.074482791126 -34077.960937500000
+                    0.070857718587 0.062466062605 0.995528578758 6.852033138275
+                    0.000000000000 0.000000000000 0.000000000000 1.000000000000
+            -->
+            <!--rosparam param ="tf_vector" > [0.06214, -0.9963, 0.05809, -6674.90185, 0.99554, 0.057750, -0.07448, -34077.96093, 0.070857, 0.06246, 0.99552, 6.85203] </rosparam -->
+
+
+		<!--remap from="/points_raw" to="/velodyne_points"/--> 
+  	</node>
+  
+</launch>

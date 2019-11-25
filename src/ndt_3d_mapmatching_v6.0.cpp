@@ -306,7 +306,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         //std::string name = save_path + "scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
 
-        std::string name = save_path + "scan_" + _time_str + ".pcd";
+        std::string name = save_path + "scan_" +std::to_string((input->header.seq)) + "_" + _time_str + ".pcd";
         writer.write(name, scan, false);
     }
 
@@ -455,8 +455,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         //std::string name = save_path + "predicted_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
 
-        std::string name = save_path + "predicted_scan_" + \
-                          _time_str + ".pcd";
+        std::string name = save_path + "predicted_scan_" +std::to_string((input->header.seq)) + "_" + _time_str + ".pcd";
 
         writer.write(name, predicted_scan, false);
     }
@@ -618,10 +617,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         //std::string name = save_path + "aligned_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
 
-        std::string name = save_path + "aligned_scan_" + \
-                           _time_str + ".pcd";
-
-
+        std::string name = save_path + "aligned_scan_" +std::to_string((input->header.seq)) + "_" + _time_str + ".pcd";
 
         writer.write(name, aligned_scan, false);
 
@@ -649,8 +645,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         //std::string name = save_path + "transformed_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
 
-        std::string name = save_path + "transformed_scan_" + \
-                           _time_str + ".pcd";
+        std::string name = save_path + "transformed_scan_" +std::to_string((input->header.seq)) + "_" + _time_str + ".pcd";
 
         writer.write(name, transformed_scan, false);
 

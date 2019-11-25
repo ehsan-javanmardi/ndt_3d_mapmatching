@@ -1,33 +1,6 @@
 /*
-  Basic node to get the location of the car using matching the scan to the map
-
+ Basic node to get the location of the car using matching the scan to the map
  Ehsan Javanmardi
-
- 2019.11.06
-    ndt_3D_mapmatching_v6
-
-    Edited so that we can use it for new velodyne driver
-    New velodyne driver does not have  pointy_type.h so I bring it from old code
-    it was #include <velodyne_pointcloud/point_types.h>  -->    #include <kmj_point_type/point_types.h>
-
-
-
- 2017.12.21
-    ndt_3D_mapmatching_v5.1
-    Option: get groundtruth as initila_guess : (groundtruth_as_prediction)
-
- 2017.12.17
-    ndt_3D_mapmatching_v5.0
-    based on ndt_3D_mapmatching_v4.0
-
- 2017.07.14
-    ndt_3D_mapmatching_v4.0
-
- TETS :
-    code is not tested yet
-
- CHANGE LOG :
-   Basic map matching
 
  */
 
@@ -75,6 +48,10 @@
 #include "kmj_common/kmj_common.h"
 #include "kmj_point_type/self_driving_point_type.h"
 #include "kmj_map/kmj_map_pcd.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/local_time_adjustor.hpp"
+#include "boost/date_time/c_local_time_adjustor.hpp"
 
 
 #include <nav_msgs/Odometry.h>
@@ -200,6 +177,27 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
     current_scan_time = input->header.stamp;
 
+    // make time human readable
+
+    double h_time = input->header.stamp.toSec();
+
+    std::ostringstream time_str;
+    std::ostringstream time_strpcd;
+    //JP timezone is utc+9
+    typedef boost::date_time::local_adjustor<boost::posix_time::ptime, +9, boost::posix_time::no_dst> jp_conversion;
+
+    boost::posix_time::ptime msg_time_stamp_UTC = input->header.stamp.toBoost();
+    boost::posix_time::ptime msg_time_stamp_JPtime = jp_conversion::utc_to_local(msg_time_stamp_UTC);
+    std::string msg_time_str = boost::posix_time::to_iso_extended_string(msg_time_stamp_JPtime);
+
+    time_str << msg_time_str;
+    time_strpcd << msg_time_str;
+    time_strpcd << ".pcd";
+
+    std::string _time_str = time_str.str();
+    std::string _time_strpcd = time_strpcd.str();
+
+
     // SKIP SPECIFIED NUMBER OF SCAN ########################################################################
 
     if (input->header.seq < (unsigned int) skipSeq)
@@ -305,9 +303,10 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     if (save_input_scan)
     {
-        std::string name = save_path + "scan_" + \
+        //std::string name = save_path + "scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
 
+        std::string name = save_path + "scan_" + _time_str + ".pcd";
         writer.write(name, scan, false);
     }
 
@@ -453,8 +452,11 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         predicted_scan.width = predicted_scan.size();
         predicted_scan.points.resize (predicted_scan.width * predicted_scan.height);
 
-        std::string name = save_path + "predicted_scan_" + \
+        //std::string name = save_path + "predicted_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
+
+        std::string name = save_path + "predicted_scan_" + \
+                          _time_str + ".pcd";
 
         writer.write(name, predicted_scan, false);
     }
@@ -561,7 +563,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // SHOW RESULTS ON THE SCREEN ##########################################################
 
-    std::cout << "##############     sequence " << input->header.seq << "    ##############" << std::endl;
+    std::cout << "Time : " << time_str.str() << "Seq : " << input->header.seq << std::endl;
     std::cout << "X : " << current_pose.x << std::endl;
     std::cout << "Y : " << current_pose.y << std::endl;
     std::cout << "Y : " << current_pose.z << std::endl;
@@ -613,8 +615,13 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         aligned_scan.width = aligned_scan.size();
         aligned_scan.points.resize (aligned_scan.width * aligned_scan.height);
 
-        std::string name = save_path + "aligned_scan_" + \
+        //std::string name = save_path + "aligned_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
+
+        std::string name = save_path + "aligned_scan_" + \
+                           _time_str + ".pcd";
+
+
 
         writer.write(name, aligned_scan, false);
 
@@ -639,8 +646,11 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     if (save_transformed_scan)
     {
-        std::string name = save_path + "transformed_scan_" + \
+        //std::string name = save_path + "transformed_scan_" + \
                            std::to_string((input->header.seq)) + ".pcd";
+
+        std::string name = save_path + "transformed_scan_" + \
+                           _time_str + ".pcd";
 
         writer.write(name, transformed_scan, false);
 
@@ -671,9 +681,12 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         FILE* pFile;
         pFile = fopen(name.c_str(), "a");
 
-        fprintf (pFile, "%i,%f,%f,%f,%f,%f,%f,%f,%i,%f,%f,%i,%f,%f,%f,%i,%i,%f,%f\n",\
+        //maybe we can use uint64_t ros::TimeBase< T, D >::toNSec	(		)	const
+
+        fprintf (pFile, "%i,%f,%s,%f,%f,%f,%f,%f,%f,%i,%f,%f,%i,%f,%f,%f,%i,%i,%f,%f\n",\
                  (int)input->header.seq, \
-                 (float)current_scan_time.toSec(),\
+                 (double)current_scan_time.toSec(),\
+                 (const char*)_time_str.c_str(),\
                  (float)current_pose.x,\
                  (float)current_pose.y,\
                  (float)current_pose.z, \
@@ -695,7 +708,6 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
         fclose(pFile);
 
     }
-
 
 }
 
@@ -855,6 +867,7 @@ int main(int argc, char **argv)
 
     fprintf (pFile, " (int)input->header.seq, \
              (float)current_scan_time,\
+             (str)current_scan_time(human readable),\
              (float)current_pose.x,\
              (float)current_pose.y,\
              (float)current_pose.z, \
